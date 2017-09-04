@@ -16,8 +16,10 @@ apt-delegate
 Usage
 -----
 
+###1, 声明接口
 
-**1, 声明接口**
+
+**1-1,ILocalDataSource**
 
 ```java
 
@@ -29,6 +31,11 @@ Usage
 	
 	    Object getLocalBook();
 	}
+```
+
+**1-2,IRemoteDataSource**
+
+```java
 
 	public interface IRemoteDataSource extends IOtherDataSource {
 	
@@ -38,12 +45,21 @@ Usage
 	
 	    void getRemoteBook();
 	}
+```
+
+**1-3,IRepository**
+
+```java
 
 	public interface IRepository extends ILocalDataSource, IRemoteDataSource {
 	}
 ```
 
-**2, 标记代理对象注解**
+
+###2, 标记代理对象注解
+
+
+**2-1, ILocalDataSource**
 
 ```java
 
@@ -62,7 +78,11 @@ Usage
 	
 	    Object getLocalBook();
 	}
+```
 
+**2-2, IRemoteDataSource**
+
+```java
 
 	@SingleDelegate(
 	        classNameImpl = "RemoteDataSourceImpl",
@@ -79,7 +99,11 @@ Usage
 	
 	    void getRemoteBook();
 	}
+```
 
+**2-3, IRepository**
+
+```java
 
 	@MultiDelegate(
 	        classNameImpl = "RepositoryImpl",
@@ -97,10 +121,11 @@ Usage
 	        })
 	public interface IRepository extends ILocalDataSource, IRemoteDataSource {
 	}
-
 ```
 
-**3,  编译期，自动生成代理对象实现类**
+###3, 编译期，自动生成代理对象实现类
+
+**3-1, LocalDataSourceImpl**
 
 ```java
 
@@ -128,6 +153,11 @@ Usage
 	    return localDataSource.getLocalBook();
 	  }
 	}
+```
+
+**3-2, RemoteDataSourceImpl**
+
+```java
 
 	/**
 	 * From poet compiler */
@@ -161,6 +191,11 @@ Usage
 	    return otherDelegate.getOtherData();
 	  }
 	}
+```
+
+**3-3, RepositoryImpl**
+
+```java
 
 	/**
 	 * From poet compiler */
@@ -188,67 +223,31 @@ Usage
 	}
 ```
 
-Detail
-------
-
-**1, 使用squareup javapoet与AbstractProcessor编译期生成代码**
+###4, 代码中使用自动生成的类（远程数据源与本地数据源）
 
 ```java
 
-	@AutoService(Processor.class) // javax.annotation.processing.IProcessor
-	@SupportedSourceVersion(SourceVersion.RELEASE_7) //java
-	@SupportedAnnotationTypes({ // 标注注解处理器支持的注解类型
-	        "com.annotation.SingleDelegate",
-	        "com.annotation.MultiDelegate"
-	})
-	public class AnnotationProcessor extends AbstractProcessor {
+	public class Repository {
 	
-	    public static final String PACKAGE = "com.poet.delegate";
-	    public static final String CLASS_DESC = "From poet compiler";
+	private static IRepository INSTANCE;
 	
-	    public Filer filer; //文件相关的辅助类
-	    public Elements elements; //元素相关的辅助类
-	    public Messager messager; //日志相关的辅助类
-	    public Types types;
-	
-	    @Override
-	    public boolean process(Set<? extends TypeElement> set, RoundEnvironment roundEnvironment) {
-	        filer = processingEnv.getFiler();
-	        elements = processingEnv.getElementUtils();
-	        messager = processingEnv.getMessager();
-	        types = processingEnv.getTypeUtils();
-	
-	        new SingleDelegateProcessor().process(set, roundEnvironment, this);
-	        new MultiDelegateProcessor().process(set, roundEnvironment, this);
-	
-	        return true;
+	private Repository() {
+	}
+
+	public static IRepository get() {
+	    if (INSTANCE == null) {
+	        synchronized (Repository.class) {
+	            if (INSTANCE == null) {
+	                INSTANCE = new RepositoryImpl(
+	                        new LocalDataSourceImpl(new LocalDelegate()),
+	                        new RemoteDataSourceImpl(new RemoteDelegate(),
+	                                new OtherDelegate()));
+	            }
+	        }
 	    }
+	    return INSTANCE;
 	}
-
-```
-
-**2, 自定义注解**
-
-
-
-```java
-
-
-	@Retention(RetentionPolicy.SOURCE)
-	@Target(ElementType.TYPE)
-	public @interface SingleDelegate {
-	
-	    /**
-	     * impl class name
-	     */
-	    String classNameImpl();
-	
-	    /**
-	     * delegate data
-	     */
-	    Delegate delegate();
 	}
-
 ```
 
 Developed by
