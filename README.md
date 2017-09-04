@@ -29,6 +29,18 @@ Usage
 	
 	    Object getLocalBook();
 	}
+
+	public interface IRemoteDataSource extends IOtherDataSource {
+	
+	    void getRemoteUser();
+	
+	    void getRemoteUserList();
+	
+	    void getRemoteBook();
+	}
+
+	public interface IRepository extends ILocalDataSource, IRemoteDataSource {
+	}
 ```
 
 **2, 标记代理对象注解**
@@ -50,6 +62,42 @@ Usage
 	
 	    Object getLocalBook();
 	}
+
+
+	@SingleDelegate(
+	        classNameImpl = "RemoteDataSourceImpl",
+	        delegate = @Delegate(
+	                delegatePackage = "com.apt.delegate.source.delegate",
+	                delegateClassName = "RemoteDelegate",
+	                delegateSimpleName = "remoteDelegate"
+	        ))
+	public interface IRemoteDataSource extends IOtherDataSource {
+	
+	    void getRemoteUser();
+	
+	    void getRemoteUserList();
+	
+	    void getRemoteBook();
+	}
+
+
+	@MultiDelegate(
+	        classNameImpl = "RepositoryImpl",
+	        Delegates = {
+	                @Delegate(
+	                        delegatePackage = "com.apt.delegate.source",
+	                        delegateClassName = "ILocalDataSource",
+	                        delegateSimpleName = "localDataSource"
+	                ),
+	                @Delegate(
+	                        delegatePackage = "com.apt.delegate.source",
+	                        delegateClassName = "IRemoteDataSource",
+	                        delegateSimpleName = "remoteDataSource"
+	                )
+	        })
+	public interface IRepository extends ILocalDataSource, IRemoteDataSource {
+	}
+
 ```
 
 **3,  编译期，自动生成代理对象实现类**
@@ -79,6 +127,64 @@ Usage
 	  public Object getLocalBook() {
 	    return localDataSource.getLocalBook();
 	  }
+	}
+
+	/**
+	 * From poet compiler */
+	public class RemoteDataSourceImpl implements IRemoteDataSource {
+	  private RemoteDelegate remoteDelegate;
+	
+	  private OtherDelegate otherDelegate;
+	
+	  public RemoteDataSourceImpl(RemoteDelegate remoteDelegate, OtherDelegate otherDelegate) {
+	    this.remoteDelegate = remoteDelegate;
+	    this.otherDelegate = otherDelegate;
+	  }
+	
+	  @Override
+	  public void getRemoteUser() {
+	     remoteDelegate.getRemoteUser();
+	  }
+	
+	  @Override
+	  public void getRemoteUserList() {
+	     remoteDelegate.getRemoteUserList();
+	  }
+	
+	  @Override
+	  public void getRemoteBook() {
+	     remoteDelegate.getRemoteBook();
+	  }
+	
+	  @Override
+	  public Object getOtherData() {
+	    return otherDelegate.getOtherData();
+	  }
+	}
+
+	/**
+	 * From poet compiler */
+	public class RepositoryImpl implements IRepository {
+	  private ILocalDataSource localDataSource;
+	
+	  private IRemoteDataSource remoteDataSource;
+	
+	  public RepositoryImpl(ILocalDataSource localDataSource, IRemoteDataSource remoteDataSource) {
+	    this.localDataSource = localDataSource;
+	    this.remoteDataSource = remoteDataSource;
+	  }
+	
+	  @Override
+	  public Object getLocalUser() {
+	    return localDataSource.getLocalUser();
+	  }
+	
+	  @Override
+	  public Object getLocalUserList() {
+	    return localDataSource.getLocalUserList();
+	  }
+	
+		......
 	}
 ```
 
