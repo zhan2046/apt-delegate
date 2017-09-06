@@ -258,6 +258,11 @@ Usage
 	}
 ```
 
+APT
+-------
+
+[Android APT 简单介绍](https://github.com/ruzhan123/apt-delegate/blob/master/Android_APT.md)
+
 Developed by
 -------
 
