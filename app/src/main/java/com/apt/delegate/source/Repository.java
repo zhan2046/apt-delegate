@@ -7,10 +7,6 @@ import com.poet.delegate.LocalDataSourceImpl;
 import com.poet.delegate.RemoteDataSourceImpl;
 import com.poet.delegate.RepositoryImpl;
 
-/**
- * Created by ruzhan on 2017/9/3.
- */
-
 public class Repository {
 
     private static IRepository INSTANCE;

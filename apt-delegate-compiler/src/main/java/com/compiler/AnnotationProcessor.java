@@ -18,7 +18,7 @@ import javax.lang.model.util.Types;
 
 
 @AutoService(Processor.class) // javax.annotation.processing.IProcessor
-@SupportedSourceVersion(SourceVersion.RELEASE_7) //java
+@SupportedSourceVersion(SourceVersion.RELEASE_8) //java
 @SupportedAnnotationTypes({ // 标注注解处理器支持的注解类型
         "com.annotation.SingleDelegate",
         "com.annotation.MultiDelegate"

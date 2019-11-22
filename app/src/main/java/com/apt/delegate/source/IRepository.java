@@ -3,10 +3,6 @@ package com.apt.delegate.source;
 import com.annotation.Delegate;
 import com.annotation.MultiDelegate;
 
-/**
- * Created by ruzhan on 2017/9/3.
- */
-
 @MultiDelegate(
         classNameImpl = "RepositoryImpl",
         Delegates = {

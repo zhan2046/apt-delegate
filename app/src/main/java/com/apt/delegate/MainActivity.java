@@ -1,7 +1,8 @@
 package com.apt.delegate;
 
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.apt.delegate.source.IRepository;
 import com.apt.delegate.source.Repository;
